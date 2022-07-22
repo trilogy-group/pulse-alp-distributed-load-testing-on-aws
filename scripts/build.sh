@@ -39,4 +39,4 @@ aws ecr-public get-login-password --region us-east-1 | docker login --username A
 docker tag $DOCKER_TAG:$PUBLIC_ECR_TAG $PUBLIC_ECR_REGISTRY:$PUBLIC_ECR_TAG
 docker push $PUBLIC_ECR_REGISTRY:$PUBLIC_ECR_TAG
 
-echo "Install/update in cloudfront from https://pulse-alp-custom-aws-dlt.s3.amazonaws.com/pulse-alp-dlt/latest/distributed-load-testing-on-aws.template"
+echo "Install/update in cloudfront from https://pulse-alp-custom-aws-dlt.s3.amazonaws.com/pulse-alp-dlt/$VERSION/distributed-load-testing-on-aws.template"

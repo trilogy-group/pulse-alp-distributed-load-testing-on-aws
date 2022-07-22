@@ -251,7 +251,7 @@ class Create extends React.Component {
             payload.testScenario.execution[0].setupScript = values.setupScript;
             payload.testScenario.execution[0].runScript = values.runScript;
             try {
-                if ((values.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken) {
+                if ((values.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken || (this.state.prevGhRepo === '')) {
                     let filename = `${testId}.ghtoken`;
                     const file = values.ghToken;
                     await Storage.put(`test-scenarios/jmeter/${filename}`, file);
@@ -844,20 +844,20 @@ class Create extends React.Component {
                                         </FormText>
                                     </FormGroup>
                                     {
-                                        (this.state.formValues.ghRepo === this.state.prevGhRepo) &&
+                                        ((this.state.formValues.ghRepo === this.state.prevGhRepo) && this.state.prevGhRepo !== '') &&
                                         <FormGroup check>
                                             <Label check>
-                                                <Input id="newTokenCheckbox" type="checkbox" onClick={this.handleTokenCheckBox} defaultChecked={this.state.chooseNewGhToken} /> Set to a new Github token.
+                                                <Input id="newTokenCheckbox" type="checkbox" onClick={this.handleTokenCheckBox} defaultChecked={this.state.chooseNewGhToken} /> Enter a new Github token.
                                             </Label>
                                         </FormGroup>
                                     }
                                     {
-                                        ((this.state.formValues.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken) &&
+                                        ((this.state.formValues.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken || (this.state.prevGhRepo === '')) &&
                                         <FormGroup>
-                                            <Label for="ghToken">Github repo containining test code</Label>
+                                            <Label for="ghToken">Github token for accessing repo</Label>
                                             <Input
                                                 value={this.state.formValues.ghToken}
-                                                type="url"
+                                                type="text"
                                                 name="ghToken"
                                                 id="ghToken"
                                                 required
