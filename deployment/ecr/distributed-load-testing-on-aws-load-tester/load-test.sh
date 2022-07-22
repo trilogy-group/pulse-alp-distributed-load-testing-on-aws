@@ -36,11 +36,20 @@ if [ "$TEST_TYPE" = "ghrepo" ]; then
   RES=$?
   echo "RETURN VALUE $RES" >> /tmp/setup.log
   aws s3 cp /tmp/setup.log s3://$S3_BUCKET/results/${TEST_ID}/SetupLogs/${PREFIX}-${UUID}.log
+  if [ $RES -ne 0 ]; then
+    echo "Setup Script Failed"
+    exit 1
+  fi
+
+  # Wait for start signal
   if [ -z "$IPNETWORK" ]; then
       python3 $SCRIPT
   else 
       python3 $SCRIPT $IPNETWORK $IPHOSTS
   fi
+
+  # Actually run the load test
+  # ** TO DO **
   exit 0
 elif [ "$TEST_TYPE" = "jmeter" ]; then
   # download JMeter jmx file
