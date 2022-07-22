@@ -254,7 +254,7 @@ class Create extends React.Component {
                 if ((values.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken || (this.state.prevGhRepo === '')) {
                     let filename = `${testId}.ghtoken`;
                     const file = values.ghToken;
-                    await Storage.put(`test-scenarios/jmeter/${filename}`, file);
+                    await Storage.put(`test-scenarios/ghrepo/${filename}`, file);
                     console.log('Token uploaded successfully');
                 }
             } catch (error) {

@@ -2,6 +2,10 @@
 
 set -eux
 
+which jq
+jq --version
+find / -name jq 2>/dev/null
+
 unset PREFIX
 export NVM_DIR="/root/.nvm"
 mkdir -p "$NVM_DIR"
@@ -15,9 +19,9 @@ echo "Configuring git"
 git config --global credential.helper "store --file /root/.git-credentials"
 
 # Set github credentials to the credentials file. Disable tracing to keep secrets from log file.
-set +x
-echo "https://oauth:${GHTOKEN}@github.com" > /root/.git-credentials
-set -x
+# set +x
+echo "https://oauth2:${GHTOKEN}@github.com" > /root/.git-credentials
+# set -x
 
 mkdir -p /root/repo
 cd /root/repo

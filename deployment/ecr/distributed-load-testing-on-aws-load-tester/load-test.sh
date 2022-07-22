@@ -29,11 +29,9 @@ if [ "$TEST_TYPE" = "ghrepo" ]; then
 
   >/tmp/setup.log
   echo "Beginning setup for scenario '$SCENARIO'. Details:" >>/tmp/setup.log
-  which jq 2>&1 >> /tmp/setup.log
-  jq --version 2>&1 >> /tmp/setup.log
-  find / -name jq 2>/dev/null >> /tmp/setup.log
   echo "JSON: $(cat test.json)" >>/tmp/setup.log
   echo "Repo: $GHREPO" >>/tmp/setup.log
+  echo "Token: $GHTOKEN" >>/tmp/setup.log
   echo "Concurrency: $CONCURRENCY" >>/tmp/setup.log
   echo "Worker number: $WORKERNUM" >>/tmp/setup.log
   echo "TEST_TYPE:: ${TEST_TYPE}" >> /tmp/setup.log
