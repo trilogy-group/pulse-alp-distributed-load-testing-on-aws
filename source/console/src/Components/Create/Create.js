@@ -4,6 +4,7 @@
 import React from 'react';
 import { API, Storage } from 'aws-amplify';
 import 'brace';
+import 'brace/mode/sh';
 import AceEditor from 'react-ace';
 import {
     Col,
@@ -250,7 +251,7 @@ class Create extends React.Component {
             payload.testScenario.execution[0].setupScript = values.setupScript;
             payload.testScenario.execution[0].runScript = values.runScript;
             try {
-                if ((values.ghRepo !== this.state.prevGhRepo) || chooseNewGhToken) {
+                if ((values.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken) {
                     let filename = `${testId}.ghtoken`;
                     const file = values.ghToken;
                     await Storage.put(`test-scenarios/jmeter/${filename}`, file);
@@ -831,7 +832,7 @@ class Create extends React.Component {
                                     <FormGroup>
                                         <Label for="ghRepo">Github repo containining test code</Label>
                                         <Input
-                                            value={this.state.formValues.endpoint}
+                                            value={this.state.formValues.ghRepo}
                                             type="url"
                                             name="ghRepo"
                                             id="ghRepo"
@@ -846,7 +847,7 @@ class Create extends React.Component {
                                         (this.state.formValues.ghRepo === this.state.prevGhRepo) &&
                                         <FormGroup check>
                                             <Label check>
-                                                <Input id="newTokenCheckbox" type="checkbox" onClick={this.handleTokenCheckBox} defaultChecked={this.state.chooseNewGhToken} /> Choose a new file.
+                                                <Input id="newTokenCheckbox" type="checkbox" onClick={this.handleTokenCheckBox} defaultChecked={this.state.chooseNewGhToken} /> Set to a new Github token.
                                             </Label>
                                         </FormGroup>
                                     }
@@ -855,7 +856,7 @@ class Create extends React.Component {
                                         <FormGroup>
                                             <Label for="ghToken">Github repo containining test code</Label>
                                             <Input
-                                                value={this.state.formValues.endpoint}
+                                                value={this.state.formValues.ghToken}
                                                 type="url"
                                                 name="ghToken"
                                                 id="ghToken"
