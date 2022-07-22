@@ -14,9 +14,8 @@ echo "UUID ${UUID}"
 echo "Download test scenario"
 aws s3 cp s3://$S3_BUCKET/test-scenarios/$TEST_ID.json test.json
 
-#if [ "$TEST_TYPE" = "ghrepo" ]; then
-if true; then
-  TEST_JSON=$(cat test.json)
+if [ "$TEST_TYPE" = "ghrepo" ]; then
+  TEST_JSON="$(cat test.json)"
   export GHTOKEN=$(aws s3 cp s3://$S3_BUCKET/public/test-scenarios/$TEST_TYPE/$TEST_ID.ghtoken -)
   export GHREPO=$(echo "$TEST_JSON" | jq -r '.execution[0].ghRepo')
   export CONCURRENCY=$(echo "$TEST_JSON" | jq -r '.execution[0].concurrency')
@@ -25,9 +24,12 @@ if true; then
   export SCENARIO_NAME=$(echo "$TEST_JSON" | jq -r '.execution[0].scenario')
   echo "$TEST_JSON" | jq -r '.execution[0].setupScript' > /tmp/setup.sh
   echo "$TEST_JSON" | jq -r '.execution[0].runScript' > /tmp/run.sh
+  chmod +x /tmp/setup.sh
+  chmod +x /tmp/run.sh
 
   >/tmp/setup.log
   echo "Beginning setup for scenario '$SCENARIO'. Details:" >>/tmp/setup.log
+  echo "JSON: $(cat test.json)" >>/tmp/setup.log
   echo "Repo: $GHREPO" >>/tmp/setup.log
   echo "Concurrency: $CONCURRENCY" >>/tmp/setup.log
   echo "Worker number: $WORKERNUM" >>/tmp/setup.log
