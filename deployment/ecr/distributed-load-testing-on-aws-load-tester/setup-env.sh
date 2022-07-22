@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -eu
 
 which jq
 jq --version
@@ -18,10 +18,9 @@ npm install -g typescript yarn
 echo "Configuring git"
 git config --global credential.helper "store --file /root/.git-credentials"
 
-# Set github credentials to the credentials file. Disable tracing to keep secrets from log file.
-# set +x
+# Set github credentials to the credentials file. Make sure tracing is disabled to keep secrets from log file.
+set +x
 echo "https://oauth2:${GHTOKEN}@github.com" > /root/.git-credentials
-# set -x
 
 mkdir -p /root/repo
 cd /root/repo
