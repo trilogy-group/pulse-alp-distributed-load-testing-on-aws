@@ -146,6 +146,10 @@ class Details extends React.Component {
             data.method = data.testScenario.scenarios[`${data.testName}`].requests[0].method;
             data.body = data.testScenario.scenarios[`${data.testName}`].requests[0].body;
             data.headers = data.testScenario.scenarios[`${data.testName}`].requests[0].headers;
+        } else if (data.testType === 'ghrepo') {
+            data.ghRepo = data.testScenario.execution[0].ghRepo;
+            data.setupScript = data.testScenario.execution[0].setupScript;
+            data.runScript = data.testScenario.execution[0].runScript;
         }
         this.setState({ data, testDuration });
     }
@@ -237,11 +241,15 @@ class Details extends React.Component {
                     }
                 ]
             };
-        } else {
+        } else if (data.testType === 'jmeter') {
             payload.testScenario.scenarios[data.testName] = {
                 script: `${testId}.jmx`
             };
             payload.fileType = data.fileType;
+        } else if (data.testType === 'ghrepo') {
+            payload.testScenario.execution[0].ghRepo = data.ghRepo;
+            payload.testScenario.execution[0].setupScript = data.setupScript;
+            payload.testScenario.execution[0].runScript = data.runScript;
         }
 
         this.setState({ isLoading: true });
@@ -372,11 +380,56 @@ class Details extends React.Component {
                                 </div>
                             }
                             {
-                                data.testType && data.testType !== '' && data.testType !== 'simple' &&
+                                data.testType && data.testType === 'jmeter' &&
                                 <Row className="detail">
                                     <Col sm="3"><b>{data.fileType === 'zip' ? 'ZIP' : 'SCRIPT'}</b></Col>
                                     <Col sm="9"><Button className="btn-link-custom" color="link" size="sm" onClick={this.handleDownload}>Download</Button></Col>
                                 </Row>
+                            }
+                            {
+                                data.testType && data.testType === 'ghrepo' &&
+                                <div>
+                                    <Row className="detail">
+                                        <Col sm="3"><b>GITHUB REPO</b></Col>
+                                        <Col sm="9">{data.ghRepo}</Col>
+                                    </Row>
+                                    <Row className="detail">
+                                        <Col sm="3"><b>SETUP SCRIPT</b></Col>
+                                        <Col sm="9">
+                                            <AceEditor
+                                                id="setupScript"
+                                                name="setupScript"
+                                                value={data.setupScript}
+                                                mode="sh"
+                                                theme="github"
+                                                width="100%"
+                                                maxLines={10}
+                                                showPrintMargin={false}
+                                                showGutter={false}
+                                                readOnly={true}
+                                                editorProps={{ $blockScrolling: true }}
+                                            />
+                                        </Col>
+                                    </Row>
+                                    <Row className="detail">
+                                        <Col sm="3"><b>RUN SCRIPT</b></Col>
+                                        <Col sm="9">
+                                            <AceEditor
+                                                id="runScript"
+                                                name="runScript"
+                                                value={data.runScript}
+                                                mode="sh"
+                                                theme="github"
+                                                width="100%"
+                                                maxLines={10}
+                                                showPrintMargin={false}
+                                                showGutter={false}
+                                                readOnly={true}
+                                                editorProps={{ $blockScrolling: true }}
+                                            />
+                                        </Col>
+                                    </Row>
+                                </div>
                             }
                         </Col>
                         <Col sm="5">

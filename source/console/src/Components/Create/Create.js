@@ -50,7 +50,7 @@ class Create extends React.Component {
         super(props);
         if (this.props.location.state && this.props.location.state.data.testId) {
             let fileType = '';
-            if (this.props.location.state.data.testType && this.props.location.state.data.testType !== 'simple') {
+            if (this.props.location.state.data.testType && this.props.location.state.data.testType === 'jmeter') {
                 if (this.props.location.state.data.fileType) {
                     fileType = this.props.location.state.data.fileType;
                 } else {
@@ -66,6 +66,8 @@ class Create extends React.Component {
                 file: null,
                 validFile: false,
                 chooseNewFile: false,
+                prevGhRepo: this.props.location.state.data.ghRepo,
+                chooseNewGhToken: false,
                 activeTab: this.props.location.state.data.recurrence ? '2' : '1',
                 submitLabel: this.props.location.state.data.scheduleDate ? "Schedule" : "Run Now",
                 formValues: {
@@ -83,6 +85,10 @@ class Create extends React.Component {
                     headers: JSON.stringify(this.props.location.state.data.headers, null, 2),
                     testType: this.props.location.state.data.testType ? this.props.location.state.data.testType : 'simple',
                     fileType: fileType,
+                    ghRepo: this.props.location.state.data.ghRepo,
+                    ghToken: '',
+                    setupScript: this.props.location.state.data.setupScript,
+                    runScript: this.props.location.state.data.runScript,
                     onSchedule: this.props.location.state.data.scheduleDate ? '1' : '0',
                     scheduleDate: this.props.location.state.data.scheduleDate || null,
                     scheduleTime: this.props.location.state.data.scheduleTime || null,
@@ -98,6 +104,8 @@ class Create extends React.Component {
                 file: null,
                 validFile: false,
                 chooseNewFile: false,
+                prevGhRepo: '',
+                chooseNewGhToken: false,
                 activeTab: '1',
                 submitLabel: 'Run Now',
                 formValues: {
@@ -115,6 +123,10 @@ class Create extends React.Component {
                     headers: '',
                     testType: 'simple',
                     fileType: '',
+                    ghRepo: '',
+                    ghToken: '',
+                    setupScript: '',
+                    runScript: '',
                     onSchedule: '0',
                     scheduleDate: null,
                     scheduleTime: null,
@@ -127,6 +139,9 @@ class Create extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.setFormValue = this.setFormValue.bind(this);
+        this.handleSetupScriptChange = this.handleSetupScriptChange.bind(this);
+        this.handleRunScriptChange = this.handleRunScriptChange.bind(this);
+        this.handleTokenCheckBox = this.handleTokenCheckBox.bind(this);
         this.handleBodyPayloadChange = this.handleBodyPayloadChange.bind(this);
         this.handleHeadersChange = this.handleHeadersChange.bind(this);
         this.handleFileChange = this.handleFileChange.bind(this);
@@ -207,7 +222,7 @@ class Create extends React.Component {
                     }
                 ]
             };
-        } else {
+        } else if (values.testType === 'jmeter') {
             payload.testScenario.scenarios[values.testName] = {
                 script: `${testId}.jmx`
             };
@@ -229,6 +244,20 @@ class Create extends React.Component {
                 } catch (error) {
                     console.error('Error', error);
                 }
+            }
+        } else if (values.testType === 'ghrepo') {
+            payload.testScenario.execution[0].ghRepo = values.ghRepo;
+            payload.testScenario.execution[0].setupScript = values.setupScript;
+            payload.testScenario.execution[0].runScript = values.runScript;
+            try {
+                if ((values.ghRepo !== this.state.prevGhRepo) || chooseNewGhToken) {
+                    let filename = `${testId}.ghtoken`;
+                    const file = values.ghToken;
+                    await Storage.put(`test-scenarios/jmeter/${filename}`, file);
+                    console.log('Token uploaded successfully');
+                }
+            } catch (error) {
+                console.error('Error', error);
             }
         }
 
@@ -261,6 +290,14 @@ class Create extends React.Component {
         }
 
         this.setFormValue(name, value);
+    }
+
+    handleSetupScriptChange(value) {
+        this.setFormValue('setupScript', value);
+    }
+
+    handleRunScriptChange(value) {
+        this.setFormValue('runScript', value);
     }
 
     handleBodyPayloadChange(value) {
@@ -297,6 +334,11 @@ class Create extends React.Component {
                 validFile: true
             });
         }
+    }
+
+    handleTokenCheckBox(event) {
+        const { checked } = event.target;
+        this.setState({ chooseNewGhToken: checked });
     }
 
     handleCheckBox(event) {
@@ -667,6 +709,7 @@ class Create extends React.Component {
                                 >
                                     <option value="simple">Single HTTP Endpoint</option>
                                     <option value="jmeter">JMeter</option>
+                                    <option value="ghrepo">Run code from Github repo</option>
                                 </Input>
                             </FormGroup>
                             {
@@ -755,7 +798,7 @@ class Create extends React.Component {
                                 </div>
                             }
                             {
-                                this.state.formValues.testType !== 'simple' &&
+                                this.state.formValues.testType === 'jmeter' &&
                                 <div>
                                     {
                                         ['zip', 'script'].includes(this.state.formValues.fileType) &&
@@ -766,7 +809,7 @@ class Create extends React.Component {
                                         </FormGroup>
                                     }
                                     {
-                                        ((this.state.formValues.testType !== 'simple' && !['zip', 'script'].includes(this.state.formValues.fileType)) || this.state.chooseNewFile) &&
+                                        ((this.state.formValues.testType === 'jmeter' && !['zip', 'script'].includes(this.state.formValues.fileType)) || this.state.chooseNewFile) &&
                                         <FormGroup>
                                             <Label for="fileUpload">Upload File</Label>
                                             <CustomInput
@@ -782,13 +825,101 @@ class Create extends React.Component {
                                     }
                                 </div>
                             }
+                            {
+                                this.state.formValues.testType === 'ghrepo' &&
+                                <div>
+                                    <FormGroup>
+                                        <Label for="ghRepo">Github repo containining test code</Label>
+                                        <Input
+                                            value={this.state.formValues.endpoint}
+                                            type="url"
+                                            name="ghRepo"
+                                            id="ghRepo"
+                                            required
+                                            onChange={this.handleInputChange}
+                                        />
+                                        <FormText color="muted">
+                                            Specify the full url of the repo. E.g. https://github.com/trilogy-group/pulse-alp
+                                        </FormText>
+                                    </FormGroup>
+                                    {
+                                        (this.state.formValues.ghRepo === this.state.prevGhRepo) &&
+                                        <FormGroup check>
+                                            <Label check>
+                                                <Input id="newTokenCheckbox" type="checkbox" onClick={this.handleTokenCheckBox} defaultChecked={this.state.chooseNewGhToken} /> Choose a new file.
+                                            </Label>
+                                        </FormGroup>
+                                    }
+                                    {
+                                        ((this.state.formValues.ghRepo !== this.state.prevGhRepo) || this.state.chooseNewGhToken) &&
+                                        <FormGroup>
+                                            <Label for="ghToken">Github repo containining test code</Label>
+                                            <Input
+                                                value={this.state.formValues.endpoint}
+                                                type="url"
+                                                name="ghToken"
+                                                id="ghToken"
+                                                required
+                                                onChange={this.handleInputChange}
+                                            />
+                                            <FormText color="muted">
+                                                Specify a personal access token for cloning the repo
+                                            </FormText>
+                                        </FormGroup>
+                                    }
+                                    <FormGroup>
+                                        <Label for="testDescription">Setup script (Optional)</Label>
+                                        <AceEditor
+                                            id="setupScript"
+                                            mode="sh"
+                                            theme="github"
+                                            value={this.state.formValues.setupScript}
+                                            highlightActiveLine={true}
+                                            onChange={this.handleSetupScriptChange}
+                                            name="setupScript"
+                                            width="100%"
+                                            height="190px"
+                                            editorProps={{ $blockScrolling: true }}
+                                            setOptions={{
+                                                showLineNumbers: true,
+                                                tabSize: 2,
+                                            }}
+                                        />
+                                        <FormText color="muted">
+                                            Shell script that is run once per node before the actual load test threads are spawned
+                                        </FormText>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Body Payload (Optional)</Label>
+                                        <AceEditor
+                                            id="runScript"
+                                            mode="sh"
+                                            theme="github"
+                                            highlightActiveLine={true}
+                                            onChange={this.handleRunScriptChange}
+                                            name="runScript"
+                                            value={this.state.formValues.runScript}
+                                            width="100%"
+                                            height="190px"
+                                            editorProps={{ $blockScrolling: true }}
+                                            setOptions={{
+                                                showLineNumbers: true,
+                                                tabSize: 2,
+                                            }}
+                                        />
+                                        <FormText color="muted">
+                                            The script that runs for every load run
+                                        </FormText>
+                                    </FormGroup>
+                                </div>
+                            }
                             <Button
                                 id="submitButton"
                                 className="submit"
                                 size="sm"
                                 onClick={this.handleSubmit}
                                 disabled={
-                                    (this.state.formValues.testType !== 'simple' && (!this.state.file && (this.state.chooseNewFile || !['zip', 'script'].includes(this.state.formValues.fileType))))
+                                    (this.state.formValues.testType === 'jmeter' && (!this.state.file && (this.state.chooseNewFile || !['zip', 'script'].includes(this.state.formValues.fileType))))
                                 }
                             >
                                 {this.state.submitLabel}
