@@ -14,25 +14,42 @@ echo "UUID ${UUID}"
 echo "Download test scenario"
 aws s3 cp s3://$S3_BUCKET/test-scenarios/$TEST_ID.json test.json
 
-TEST_TYPE=custom
+if [ "$TEST_TYPE" = "ghrepo" ]; then
+  TEST_JSON="$(cat test.json)"
+  export GHTOKEN=$(aws s3 cp s3://$S3_BUCKET/public/test-scenarios/$TEST_TYPE/$TEST_ID.ghtoken -)
+  export GHREPO=$(echo "$TEST_JSON" | jq -r '.execution[0].ghRepo')
+  export CONCURRENCY=$(echo "$TEST_JSON" | jq -r '.execution[0].concurrency')
+  export RAMP_UP=$(echo "$TEST_JSON" | jq -r '.execution[0].ramp-up')
+  export HOLD_FOR=$(echo "$TEST_JSON" | jq -r '.execution[0].hold-for')
+  export SCENARIO_NAME=$(echo "$TEST_JSON" | jq -r '.execution[0].scenario')
+  echo "$TEST_JSON" | jq -r '.execution[0].setupScript' > /tmp/setup.sh
+  echo "$TEST_JSON" | jq -r '.execution[0].runScript' > /tmp/run.sh
+  chmod +x /tmp/setup.sh
+  chmod +x /tmp/run.sh
 
-if [ "$TEST_TYPE" = "custom" ]; then
-  echo "S3_BUCKET:: ${S3_BUCKET}" >> /tmp/setup.log
-  echo "TEST_ID:: ${TEST_ID}" >> /tmp/setup.log
-  echo "TEST_TYPE:: ${TEST_TYPE}" >> /tmp/setup.log
-  echo "FILE_TYPE:: ${FILE_TYPE}" >> /tmp/setup.log
-  echo "PREFIX:: ${PREFIX}" >> /tmp/setup.log
-  echo "UUID ${UUID}" >> /tmp/setup.log
-  echo "WORKER: $WORKERNUM" >> /tmp/setup.log
+  >/tmp/setup.log
+  echo "Beginning setup for scenario '$SCENARIO'. Details:" >>/tmp/setup.log
+  echo "Repo: $GHREPO" >>/tmp/setup.log
+  echo "Concurrency: $CONCURRENCY" >>/tmp/setup.log
+  echo "Worker number: $WORKERNUM" >>/tmp/setup.log
   ./setup-env.sh >>/tmp/setup.log 2>&1
   RES=$?
   echo "RETURN VALUE $RES" >> /tmp/setup.log
   aws s3 cp /tmp/setup.log s3://$S3_BUCKET/results/${TEST_ID}/SetupLogs/${PREFIX}-${UUID}.log
+  if [ $RES -ne 0 ]; then
+    echo "Setup Script Failed"
+    exit 1
+  fi
+
+  # Wait for start signal
   if [ -z "$IPNETWORK" ]; then
       python3 $SCRIPT
   else 
       python3 $SCRIPT $IPNETWORK $IPHOSTS
   fi
+
+  # Actually run the load test
+  # ** TO DO **
   exit 0
 elif [ "$TEST_TYPE" = "jmeter" ]; then
   # download JMeter jmx file

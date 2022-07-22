@@ -1,0 +1,22 @@
+{
+	"execution": [{
+		"concurrency":1,
+		"ramp-up":"0m",
+		"hold-for":"1m",
+		"scenario":"Test gh",
+		"ghRepo":"https://github.com/trilogy-group/pulse-alp",
+		"setupScript":"#!/bin/bash\n\necho \"THIS IS A TEST\"",
+		"runScript":"#!/bin/bash\n\necho \"THIS IS A TEST2\""}
+	],
+	"scenarios":{
+		"Test gh":{}
+	},
+	"reporting":[{
+		"module":"final-stats",
+		"summary":true,
+		"percentiles":true,
+		"summary-labels":true,
+		"test-duration":true,
+		"dump-xml":"/tmp/artifacts/results.xml"
+	}]
+}

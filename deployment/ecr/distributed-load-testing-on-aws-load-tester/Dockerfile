@@ -1,9 +1,10 @@
 FROM blazemeter/taurus
+ARG FORCE_REBUILD=4
 # taurus includes python and pip
 RUN /usr/bin/python3 -m pip install --upgrade pip
 RUN pip install --no-cache-dir awscli
 RUN apt-get update
-RUN apt-get -y install xmlstarlet bc git
+RUN apt-get -y install xmlstarlet bc git jq
 # Taurus working directory  = /bzt-configs
 ADD ./*.sh /bzt-configs/
 ADD ./*.jar /bzt-configs/
