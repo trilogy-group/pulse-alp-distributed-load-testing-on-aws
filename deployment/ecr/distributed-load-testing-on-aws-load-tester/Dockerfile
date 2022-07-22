@@ -1,7 +1,7 @@
 FROM blazemeter/taurus
 # taurus includes python and pip
 RUN /usr/bin/python3 -m pip install --upgrade pip
-RUN pip install --no-cache-dir awscli
+RUN pip install --no-cache-dir awscli jq
 RUN apt-get update
 RUN apt-get -y install xmlstarlet bc git
 # Taurus working directory  = /bzt-configs

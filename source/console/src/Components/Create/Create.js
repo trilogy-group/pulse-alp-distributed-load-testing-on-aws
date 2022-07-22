@@ -4,7 +4,7 @@
 import React from 'react';
 import { API, Storage } from 'aws-amplify';
 import 'brace';
-import 'brace/mode/sh';
+// import 'brace/mode/sh';
 import AceEditor from 'react-ace';
 import {
     Col,
