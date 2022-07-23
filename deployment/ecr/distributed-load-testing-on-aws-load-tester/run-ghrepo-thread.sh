@@ -12,6 +12,7 @@ COUNT=0
 while true; do
     ITERSTART="$(date +%s%N)"
     /tmp/run.sh $1 $2 $COUNT
+    RES=$?
     ITEREND="$(date +%s%N)"
     let ELAPSED_MS=(ITEREND-ITERSTART)/1000000
     let COUNT++
