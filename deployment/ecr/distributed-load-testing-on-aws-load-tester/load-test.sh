@@ -61,8 +61,7 @@ if [ "$TEST_TYPE" = "ghrepo" ]; then
 
   # Actually run the load test
   # ** TO DO **
-
-  for
+  ./run-ghrepo-test.sh
 
   exit 0
 elif [ "$TEST_TYPE" = "jmeter" ]; then
