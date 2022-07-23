@@ -15,6 +15,12 @@ while true; do
     RES=$?
     ITEREND="$(date +%s%N)"
     let ELAPSED_MS=(ITEREND-ITERSTART)/1000000
+    if [ $RES -eq 0 ]; then
+        RES=pass
+    else
+        RES=fail
+    fi
+    echo "$RES $ELAPSED_MS" >> /tmp/ghrepo-results/thread$2.txt
     let COUNT++
     if [ $(date +%s) -ge $4 ]; then
         break

@@ -4,7 +4,7 @@ ARG FORCE_REBUILD=4
 RUN /usr/bin/python3 -m pip install --upgrade pip
 RUN pip install --no-cache-dir awscli
 RUN apt-get update
-RUN apt-get -y install xmlstarlet bc git jq
+RUN apt-get -y install xmlstarlet bc git jq datamash
 # Taurus working directory  = /bzt-configs
 ADD ./*.sh /bzt-configs/
 ADD ./*.jar /bzt-configs/

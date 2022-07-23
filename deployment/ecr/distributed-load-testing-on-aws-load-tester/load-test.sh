@@ -60,7 +60,6 @@ if [ "$TEST_TYPE" = "ghrepo" ]; then
   fi
 
   # Actually run the load test
-  # ** TO DO **
   ./run-ghrepo-test.sh
 
   exit 0
