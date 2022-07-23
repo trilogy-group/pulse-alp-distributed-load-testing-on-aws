@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# INPUTS:
+# CONCURRENCY
+# RAMP_UP
+# HOLD_FOR
+# WORKERNUM
+
+STARTTIME=$(date +%s)
+let ENDTIME=STARTTIME+RAMP_UP+HOLD_FOR
+THREADNUM=1
+while [ "$THREADNUM" -le "$CONCURRENCY" ]; do
+    let SLEEPTIME=((THREAD-1)*RAMP_UP)/CONCURRENCY
+    ./run-ghrepo-thread.sh $WORKERNUM $THREADNUM $SLEEPTIME $ENDTIME >/dev/null 2>&1 &
+    let THREADNUM++
+done
+sleep $RAMP_UP
+sleep $HOLD_FOR
+sleep 2
+exit 0
