@@ -62,6 +62,10 @@ if [ "$TEST_TYPE" = "ghrepo" ]; then
   # Actually run the load test
   ./run-ghrepo-test.sh
 
+  # Upload results
+  echo "Uploading results"
+  aws s3 cp /tmp/ghrepo-results/summary.xml s3://$S3_BUCKET/results/${TEST_ID}/${PREFIX}-${UUID}.xml
+
   exit 0
 elif [ "$TEST_TYPE" = "jmeter" ]; then
   # download JMeter jmx file
