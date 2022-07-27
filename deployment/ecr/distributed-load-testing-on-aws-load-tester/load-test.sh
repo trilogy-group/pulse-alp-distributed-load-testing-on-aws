@@ -43,26 +43,36 @@ if [ "$TEST_TYPE" = "ghrepo" ]; then
   echo "Repo: $GHREPO" >>/tmp/setup.log
   echo "Concurrency: $CONCURRENCY" >>/tmp/setup.log
   echo "Worker number: $WORKERNUM" >>/tmp/setup.log
+  echo "Ramp up seconds: $RAMP_UP" >>/tmp/setup.log
+  echo "Hold for seconds: $HOLD_FOR" >>/tmp/setup.log
+  echo "===========================" >>/tmp/setup.log
   ./setup-env.sh >>/tmp/setup.log 2>&1
   RES=$?
   echo "RETURN VALUE $RES" >> /tmp/setup.log
   aws s3 cp /tmp/setup.log s3://$S3_BUCKET/results/${TEST_ID}/SetupLogs/${PREFIX}-${UUID}.log
   if [ $RES -ne 0 ]; then
-    echo "Setup Script Failed"
+    echo "Setup Script Failed $RES" | aws s3 cp - s3://$S3_BUCKET/results/${TEST_ID}/status.txt
     exit 1
   fi
 
-  # Wait for start signal
-  if [ -z "$IPNETWORK" ]; then
-      python3 $SCRIPT
-  else 
-      python3 $SCRIPT $IPNETWORK $IPHOSTS
+  echo "Pre-python $SCRIPT $IPNETWORK $IPHOSTS" | aws s3 cp - s3://$S3_BUCKET/results/${TEST_ID}/status.txt
+  # Wait for start signal unless we are the only one.
+  if [ -n "$SCRIPT" ]; then
+    if [ -z "$IPNETWORK" ]; then
+        python3 $SCRIPT
+    else 
+        python3 $SCRIPT $IPNETWORK $IPHOSTS
+    fi
   fi
+  echo "Post-python" | aws s3 cp - s3://$S3_BUCKET/results/${TEST_ID}/status.txt
 
   # Actually run the load test
-  # ** TO DO **
+  ./run-ghrepo-test.sh
+  echo "Post-run" | aws s3 cp - s3://$S3_BUCKET/results/${TEST_ID}/status.txt
 
-  for
+  # Upload results
+  echo "Uploading results"
+  aws s3 cp /tmp/ghrepo-results/summary.xml s3://$S3_BUCKET/results/${TEST_ID}/${PREFIX}-${UUID}.xml
 
   exit 0
 elif [ "$TEST_TYPE" = "jmeter" ]; then

@@ -2,10 +2,6 @@
 
 set -eu
 
-which jq
-jq --version
-find / -name jq 2>/dev/null
-
 unset PREFIX
 export NVM_DIR="/root/.nvm"
 mkdir -p "$NVM_DIR"
