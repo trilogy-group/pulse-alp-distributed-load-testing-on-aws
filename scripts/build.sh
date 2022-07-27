@@ -25,7 +25,11 @@ chmod +x ./build-s3-dist.sh
 cd $BUILDPATH/ecr/distributed-load-testing-on-aws-load-tester
 REPO_URL=${PUBLIC_ECR_REGISTRY%/*}
 DOCKER_TAG=${PUBLIC_ECR_REGISTRY##*/}
-docker build -t $DOCKER_TAG:$PUBLIC_ECR_TAG .
+if ! docker build -t $DOCKER_TAG:$PUBLIC_ECR_TAG .; then
+    echo "ERROR! Docker build failed"
+    exit 1
+fi
+
 
 # Deploy lambda and step function code to s3
 cd $BUILDPATH/regional-s3-assets
