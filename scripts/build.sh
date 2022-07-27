@@ -26,6 +26,7 @@ cd $BUILDPATH/ecr/distributed-load-testing-on-aws-load-tester
 REPO_URL=${PUBLIC_ECR_REGISTRY%/*}
 DOCKER_TAG=${PUBLIC_ECR_REGISTRY##*/}
 if ! docker build -t $DOCKER_TAG:$PUBLIC_ECR_TAG .; then
+    # Maybe due to base image
     echo "ERROR! Docker build failed"
     exit 1
 fi
